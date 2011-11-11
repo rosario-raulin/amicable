@@ -29,6 +29,8 @@ define macro inc!
     => { inc!(?place, 1) }
 end macro;
 
+define variable *sum-table* = make(<table>);
+
 define function sqrt(x)
   => (sqrt)
   x ^ 0.5;
@@ -36,16 +38,21 @@ end function sqrt;
 
 define function factor-sum (n)
   => (sum)
-  let sum = 1;
-  
-  for(x from 2 to (1 + sqrt(n)))
-    if(modulo(n, x) = 0)
-      inc!(sum, x + truncate/(n, x));
-    end if;
-  end for;
+  let table-element = element(*sum-table*, n, default: #f);
 
-  values(sum);
-end function factor-sum;
+  if(table-element)
+    table-element
+  else
+    let sum = 1;
+    for(x from 2 to (1 + sqrt(n)))
+      if(modulo(n, x) = 0)
+        inc!(sum, x + truncate/(n, x));
+      end if;
+    end for;
+    element-setter(sum, *sum-table*, n);
+    sum;
+  end if;
+end;
 
 define function amicable(n)
   => (pairs)
@@ -66,7 +73,7 @@ define function amicable(n)
     end if;
   end for;
   
-  values(reverse!(pairs));
+  reverse!(pairs);
 end function amicable;
 
 begin
